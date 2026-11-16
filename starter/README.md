@@ -56,6 +56,27 @@ python3 starter/agent_metrics.py --cases <cases.json> --traces <traces.json> --r
 
 Thay đường dẫn trong `< >`. Script tổng hợp nhãn bạn đã chấm, không tự đánh giá nội dung. Mẫu số bằng 0 nghĩa là không áp dụng. Lỗi kết nối được báo riêng, không tính vào chất lượng; giữ trace và nhãn để đối chiếu.
 
+## 5. Dùng repo Day 6
+
+`day6_adapter.py` kết nối bảng `strategy_chunks` của Day 6. Database cần chạy và index cần ingest trước. Dense adapter dùng `EMBEDDING_MODEL` đúng như Day 6 và kích thước cấu hình phải khớp bảng.
+
+Cài dependencies Day 6 cùng `openai`, `python-dotenv` và `psycopg[binary]` trong cùng môi trường. Day 6 `.env` đặt `EMBEDDING_MODEL=text-embedding-3-small`, `EMBEDDING_DIMENSIONS=1536` và `OPENAI_API_KEY`; chạy lại Day 6 pipeline để tạo lại index bằng model đó trước khi dense search. Cấu hình thêm `AGENT_MODEL` và khóa API trong môi trường, không commit secrets. Ví dụ chạy từ repo Day 7:
+
+```bash
+python starter/run_day7.py --day6 ../K5-L3-DAY06-NguyenMinhThanh-2A202603884-DataIngestionEngineering --split dev --method tfidf --output starter/results/tfidf-dev.json
+python starter/run_day7.py --day6 ../K5-L3-DAY06-NguyenMinhThanh-2A202603884-DataIngestionEngineering --split dev --method dense --output starter/results/dense-dev.json
+python starter/run_day7.py --day6 ../K5-L3-DAY06-NguyenMinhThanh-2A202603884-DataIngestionEngineering --split dev --method hybrid --output starter/results/hybrid-dev.json
+python starter/run_day7.py --day6 ../K5-L3-DAY06-NguyenMinhThanh-2A202603884-DataIngestionEngineering --split dev --method hybrid --agent --output starter/results/agent-dev.json
+```
+
+Only run `--split test` after choosing on dev. Retrieval traces include query, filter, rank/score and timing. Agent traces include tool calls, context and citations; a person must still grade answer grounding and citation support.
+
+For two supplemental unanswerable dev questions, run with a replacement key after revoking any exposed key:
+
+```bash
+python starter/run_day7.py --day6 ../K5-L3-DAY06-NguyenMinhThanh-2A202603884-DataIngestionEngineering --questions data/agent_unanswerable_dev.json --split dev --method dense --agent --output starter/results/agent-unanswerable-dev.json
+```
+
 ## Lưu ý
 
 TF-IDF dùng cách tách từ đơn giản. `baseline.py` dùng mặc định context budget 800 ký tự, gồm cả nguồn; chunk không vừa bị bỏ. Bạn có thể chọn cách khác. File kết quả cùng tên sẽ bị ghi đè. `starter/data/` và `starter/results/` không được Git theo dõi mặc định; nếu được phép chia sẻ, dùng `git add -f <đường-dẫn>`, hoặc ghi cách tái tạo. Không nộp dữ liệu mật và secret.

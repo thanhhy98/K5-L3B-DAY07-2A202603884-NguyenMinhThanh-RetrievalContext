@@ -1,0 +1,16 @@
+[
+  {
+    "id": "UDEV01",
+    "split": "dev",
+    "question": "What is the exact name and phone number of the student handbook's author?",
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "The handbook contains no author identity or author phone number."
+  },
+  {
+    "id": "UDEV02",
+    "split": "dev",
+    "question": "What is the university president's date of birth?",
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "The handbook does not provide the president's date of birth."
+  }
+]

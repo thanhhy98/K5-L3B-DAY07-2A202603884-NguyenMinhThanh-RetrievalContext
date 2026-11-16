@@ -1,0 +1,16 @@
+[
+  {
+    "id": "UTEST01",
+    "split": "test",
+    "question": "What is the exact street address of the university president's private residence?",
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "The handbook contains no private residence address for the university president."
+  },
+  {
+    "id": "UTEST02",
+    "split": "test",
+    "question": "What was the exact number of students who used the campus shuttle last Tuesday?",
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "The handbook provides no ridership count for a particular date."
+  }
+]

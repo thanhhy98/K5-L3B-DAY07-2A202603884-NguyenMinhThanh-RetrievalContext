@@ -54,7 +54,11 @@ def run_agent(question: str, controller: Controller, retriever: Retriever, *,
             results = retriever.search(query, filters=filters, top_k=top_k)
             if len(results) > top_k or len({r['id'] for r in results}) != len(results):
                 raise ValueError('retriever phải trả tối đa top_k chunk ID duy nhất')
-            candidates.extend(results)
+            # Latest rank from a repeated search wins; preserve the original
+            # object for each ID so context is deduplicated across tool calls.
+            for result in results:
+                candidates = [c for c in candidates if c['id'] != result['id']]
+                candidates.append(result)
             context, ids = pack_context(candidates, budget=budget)
             chunks = {c['id']: c for c in candidates if c['id'] in ids}
             events.append({'event': 'search', 'query': query, 'filter': filters, 'results': results,
@@ -68,7 +72,8 @@ def run_agent(question: str, controller: Controller, retriever: Retriever, *,
                 raise ValueError('answer/citations không hợp lệ')
             valid = bool(answer.strip() and citations and all(i in chunks and f'[{i}]' in answer for i in citations))
             if valid:
-                return {'status': 'answered', 'answer': answer, 'citations': citations, 'events': events + [{'event': 'answer'}]}
+                return {'status': 'answered', 'answer': answer, 'citations': citations,
+                        'context': context, 'context_ids': ids, 'events': events + [{'event': 'answer'}]}
             return {'status': 'abstain', 'answer': 'Không đủ bằng chứng để trả lời.', 'citations': [], 'events': events + [{'event': 'invalid_or_missing_citations'}]}
         else:
             raise ValueError('action phải là search hoặc answer')
